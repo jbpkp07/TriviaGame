@@ -1,33 +1,46 @@
 "use strict";
-/* global Controller */
+/* global GameController */
 
 class Game {
 
     constructor() {
 
-        this._Controller = new Controller();
-        this._IsStartSequenceInitiated = false;
+        this._GameController = null;
     }
 
     startGame() {
+    
+        this._GameController = new GameController();
 
-        if (!this._IsStartSequenceInitiated) {
+        this._GameController.beginStartSequence().then(() => {
 
-            this._IsStartSequenceInitiated = true;
-
-            let hasFinishedPromise = this._Controller.beginStartSequence();
-
-            hasFinishedPromise.then(() => {
-
-                this.continueGame();
-            });
-        }
+            this.pickCategory();
+        });
     }
 
-    continueGame() {
+    pickCategory() {
+       
+        this._GameController.pickCategory().then(() => {
 
-        this._Controller.assignListeners();
+            this.pickDifficulty();
+        });
+    }
 
-        this._Controller.beginNextPhrase();
+    pickDifficulty() {
+
+        this._GameController.pickDifficulty().then(() => {
+
+            this.startTriviaQuestions();
+        });
+    }
+
+    startTriviaQuestions() {
+
+        this._GameController.getTriviaQuestionsFromAPI().then(() => {
+
+            this._GameController.beginTriviaQuestions();
+
+            this.startGame();
+        });
     }
 }

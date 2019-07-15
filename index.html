@@ -5,13 +5,12 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Computer Hangman v1.1</title>
+    
+    <title>Trivia Game</title>
 
-    <!-- Bootstrap Javascript references for navbar to toggle when screen is small (xs)-->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./assets/css/reset.css" type="text/css">
     <link rel="stylesheet" href="./assets/css/style.css" type="text/css">
 
 </head>
@@ -21,42 +20,37 @@
     <div id="game">
         <div id="backgroundIMG">
             <div id="chalkboardBox">
-                <div id="gameTitle" class="showGameTitle">
+                <div id="gameTitle">
                     Trivia Game
+                </div>
+                <div id="startBTN">
+                    Click To Start
+                </div>
+                <div id="categories" style="display: none;">
+                    <div id="pickCategory">Pick Category</div>
+                    <div id="categoryBTNs"></div>
+                </div>
+                <div id="difficulties" style="display: none;">
+                    <div id="pickDifficulty">Pick Difficulty</div>
+                    <div id="difficultyBTNs"></div>
                 </div>
             </div>
         </div>
     </div>
 
-
-
-    <div id="categoryStats" class="hideCategoryStats">
-        <span id="guessesRemaining" class="correct">Guesses Remaining :</span>
-        <span id="categoryBox">
-            <span id="categoryLabel">Category :</span>
-            <span id="categoryText">Test</span>
-        </span>
-        <span id="winsScore" class="win">Wins : Score : </span>
-    </div>
-
-    <div id="phrase" class="hidePhrase">
-        Phrase
-    </div>
-
-
-
-    <script src="./assets/javascript/View.js"></script>
+    <script src="./assets/javascript/ViewController.js"></script>
     <script src="./assets/javascript/Model.js"></script>
-    <script src="./assets/javascript/CategoryPhrases.js"></script>
-    <script src="./assets/javascript/Controller.js"></script>
+    <script src="./assets/javascript/GameController.js"></script>
     <script src="./assets/javascript/Game.js"></script>
 
     <script>
-        let launcher = new Game();
+        $(document).ready(() => {
 
-        launcher.startGame();
+            let launcher = new Game();
+
+            launcher.startGame();
+        });
     </script>
-
 
 </body>
 
