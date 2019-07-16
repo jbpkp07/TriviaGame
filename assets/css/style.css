@@ -80,3 +80,37 @@ body, html {
     font-size: 5vw;
     text-align: center;
 }
+
+
+
+#question, #answerBTNs {
+    font-size: 2vw;
+    margin-top: 10%;
+}
+
+#category {
+    float: left;
+}
+
+#difficulty {
+    float: right;
+}
+
+#clearFixAfter::after {
+    clear: both;
+    content: "";
+    display: block;
+}
+
+.answerBTN {
+    border: 2px solid rgb(244, 244, 240);
+    border-radius: 25px;
+    font-size: 1.0vw;
+    margin: 0 auto;
+    margin-top: 5%;
+    padding: 1%;
+    position: relative;
+    text-align: center;
+    top: 30%;
+    width: 55%;
+}

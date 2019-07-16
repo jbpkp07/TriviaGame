@@ -113,25 +113,27 @@ class GameController {
 
         if (this._Model._IsAnotherQuestionAvailable) {
 
-            let question = this._Model.getNextTriviaQuestion();
-
-            this._ViewController.createNewQuestion(question);
-
-            this._ViewController.showQuestion().then(() => {
-
-                    alert("paused");
-            });
-
-        
+            this.startNextQuestion();
         }
-
-
-
     }
 
     startNextQuestion() {
 
+        let question = this._Model.getNextTriviaQuestion();
 
+        this._ViewController.createNewQuestion(question);
+
+        this._ViewController.showQuestion().then(() => {
+
+            $(".answerBTN").click(function () { 
+
+                $(".answerBTN").off("click");
+
+                let selectedAnswer = $(this).text();
+
+                alert(selectedAnswer);
+            });
+        });
     }
 
     createPromise(waitFunction) {
