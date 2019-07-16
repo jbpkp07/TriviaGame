@@ -18,8 +18,24 @@ class ViewController {
         this._Category = $("#category");
         this._Difficulty = $("#difficulty");
         this._AnswerBTNs = $("#answerBTNs");
+        this._Timer = $("#timer");
+
+        this._RevealAnswer = $("#revealAnswer");
+        this._Result = $("#result");
+        this._CorrectAnswer = $("#correctAnswer");
+        this._CorrectAnswers = $("#correctAnswers");
+        this._IncorrectAnswers = $("#incorrectAnswers");
+        this._Unanswered = $("#unanswered");
+        this._PlayAgainBTN = $("#playAgainBTN");
+
+        this._StartTime = 0;
+        this._TimerID = 0;
+        this._IsTimerRunning = false;
+        this._WasTimerManuallyStopped = false;
 
         this._IsGameStarted = false;
+
+        this.initialize();
     }
 
     initialize() {
@@ -75,7 +91,7 @@ class ViewController {
 
             newBTN.text(category);
 
-            newBTN.addClass("categoryBTN");
+            newBTN.addClass("categoryBTN button");
 
             this._CategoryBTNs.append(newBTN);
         }
@@ -104,7 +120,7 @@ class ViewController {
 
             newBTN.text(difficulty);
 
-            newBTN.addClass("difficultyBTN");
+            newBTN.addClass("difficultyBTN button");
 
             this._DifficultyBTNs.append(newBTN);
         }
@@ -127,24 +143,28 @@ class ViewController {
 
     createNewQuestion(question) {
 
-        this._Category.html("Category: &nbsp;&nbsp;" + question._Category);
+        this.emptyAnswerBTNs();
+
+        this._Category.html("Category :&nbsp;&nbsp;" + question._Category);
 
         let difficulty = question._Difficulty.charAt(0).toUpperCase() + question._Difficulty.slice(1);
 
-        this._Difficulty.html("Difficulty: &nbsp;&nbsp;" + difficulty);
+        this._Difficulty.html("Difficulty :&nbsp;&nbsp;" + difficulty);
 
-        this._Question.html("Question: &nbsp;" + question._Question);
+        this._Question.html(question._Question);
 
         for (let answer of question._Answers) {
 
             var newBTN = $("<div>");
 
-            newBTN.text(answer);
+            newBTN.html(answer);
 
-            newBTN.addClass("answerBTN");
+            newBTN.addClass("answerBTN button");
 
             this._AnswerBTNs.append(newBTN);
         }
+
+        this._Timer.text("Time : " + this._StartTime);
     }
 
     emptyAnswerBTNs() {
@@ -160,6 +180,79 @@ class ViewController {
     hideQuestion(mSec) {
 
         return this._Questions.fadeOut(mSec).promise();
+    }
+
+    startTimer() {
+
+        let timeRemaining = this._StartTime;
+
+        this._IsTimerRunning = true;
+
+        this._WasTimerManuallyStopped = false;
+
+        this._Timer.text("Time : " + timeRemaining);
+
+        timeRemaining--;
+
+        this._TimerID = setInterval(() => {
+
+            this._Timer.text("Time : " + timeRemaining);
+
+            if (timeRemaining === 0) {
+
+                this.resetTimer();
+            }
+
+            timeRemaining--;
+
+        }, 1000);
+    }
+
+    stopTimer() {
+
+        this._WasTimerManuallyStopped = true;
+
+        this.resetTimer();
+    }
+
+    resetTimer() {
+
+        clearInterval(this._TimerID);
+
+        this._IsTimerRunning = false;
+    }
+
+    setRevealAnswer(question, results) {
+
+        this._Result.text(results.lastResult);
+
+        this._CorrectAnswer.html("(Correct : " + question._CorrectAnswer + ")");
+
+        this._CorrectAnswers.text("Total Correct : " + results.correctAnswers).addClass("totals");
+
+        this._IncorrectAnswers.text("Total Incorrect : " + results.incorrectAnswers).addClass("totals");
+
+        this._Unanswered.text("Total Unanswered : " + results.unanswered).addClass("totals");
+    }
+
+    showRevealAnswer(mSec) {
+
+        return this._RevealAnswer.fadeIn(mSec).promise();
+    }
+
+    hideRevealAnswer(mSec) {
+
+        return this._RevealAnswer.fadeOut(mSec).promise();
+    }
+
+    showPlayAgainBTN(mSec) {
+
+        return this._PlayAgainBTN.fadeIn(mSec).promise();
+    }
+
+    hidePlayAgainBTN(mSec) {
+
+        return this._PlayAgainBTN.fadeOut(mSec).promise();
     }
 
 

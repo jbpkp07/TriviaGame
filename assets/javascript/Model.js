@@ -1,4 +1,5 @@
 "use strict";
+/* global Utility */
 
 class Model {
 
@@ -6,6 +7,7 @@ class Model {
 
         this._TriviaQuestions = [];
         this._TriviaQuestionsIndex = 0;
+        this._CurrentQuestion = null;
 
         this._QuestionAmount = 10;
 
@@ -15,8 +17,22 @@ class Model {
         this._AreQuestionsReady = false;
         this._IsAnotherQuestionAvailable = false;
 
+        this._Results = {
+
+            correctAnswers: 0,
+            incorrectAnswers: 0,
+            unanswered: 0,
+            lastResult: "NONE"
+        };
+
         this._TriviaAPI = new TriviaAPI(this._QuestionAmount);
     }
+
+    static correct() { return "Correct Answer!"; }
+
+    static incorrect() { return "Incorrect Answer"; }
+
+    static unanswered() { return "Unanswered..."; }
 
     setTriviaQuestions() {
 
@@ -50,12 +66,12 @@ class Model {
             this._AreQuestionsReady = true;
         });
 
-        return this.createPromise(() => this._AreQuestionsReady === true);
+        return Utility.createPromise(() => this._AreQuestionsReady === true);
     }
 
     getNextTriviaQuestion() {
 
-        let question = this._TriviaQuestions[this._TriviaQuestionsIndex];
+        this._CurrentQuestion = this._TriviaQuestions[this._TriviaQuestionsIndex];
 
         this._TriviaQuestionsIndex++;
 
@@ -64,26 +80,31 @@ class Model {
             this._IsAnotherQuestionAvailable = false;
         }
 
-        return question;
+        return this._CurrentQuestion;
     }
 
-    createPromise(waitFunction) {
+    updateQuestionAnswered(selectedAnswer) {
 
-        const poll = (resolve) => {
+        if (selectedAnswer === this._CurrentQuestion._CorrectAnswer) {
 
-            if (waitFunction()) {
-                resolve();
-            }
-            else {
-                setTimeout(() => poll(resolve), 100);
-            }
-        };
+            this._Results.correctAnswers++;
 
-        return new Promise(poll);
+            this._Results.lastResult = Model.correct();
+        }
+        else {
+
+            this._Results.incorrectAnswers++;
+
+            this._Results.lastResult = Model.incorrect();
+        }
     }
 
-    // get guessesRemaining() { return this._GuessesRemaining; }
-    // set guessesRemaining(value) { throw new Error("Class:Model:guessesRemaining is PRIVATE"); }
+    updateQuestionUnAnswered() {
+
+        this._Results.unanswered++;
+
+        this._Results.lastResult = Model.unanswered();
+    }
 }
 
 
@@ -134,7 +155,7 @@ class TriviaAPI {
             throw new Error("Class:GameController:getTriviaQuestionsFromAPI trivia API did not respond correctly");
         });
 
-        return this.createPromise(() => this._AreTriviaQuestionsConsumed === true);
+        return Utility.createPromise(() => this._AreTriviaQuestionsConsumed === true);
     }
 
     generateAPIUrl(category, difficulty) {
@@ -171,21 +192,6 @@ class TriviaAPI {
             this._APIType;
 
         return apiUrl;
-    }
-
-    createPromise(waitFunction) {
-
-        const poll = (resolve) => {
-
-            if (waitFunction()) {
-                resolve();
-            }
-            else {
-                setTimeout(() => poll(resolve), 100);
-            }
-        };
-
-        return new Promise(poll);
     }
 }
 

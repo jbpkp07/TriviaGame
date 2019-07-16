@@ -9,7 +9,7 @@ class Game {
     }
 
     startGame() {
-    
+
         this._GameController = new GameController();
 
         this._GameController.beginStartSequence().then(() => {
@@ -19,7 +19,7 @@ class Game {
     }
 
     pickCategory() {
-       
+
         this._GameController.pickCategory().then(() => {
 
             this.pickDifficulty();
@@ -38,9 +38,11 @@ class Game {
 
         this._GameController.getTriviaQuestionsFromAPI().then(() => {
 
-            this._GameController.beginTriviaQuestions();
+            this._GameController.answerTriviaQuestions().then(() => {
 
-            // this.startGame();
+                this.startGame();  //User chose to play again
+            });
+
         });
     }
 }

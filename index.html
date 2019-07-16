@@ -5,8 +5,8 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <title>Trivia Game v1.1</title>
+
+    <title>Trivia Game v1.2</title>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
@@ -23,7 +23,7 @@
                 <div id="gameTitle">
                     Trivia Game
                 </div>
-                <div id="startBTN">
+                <div id="startBTN" class="button">
                     Click To Start
                 </div>
                 <div id="categories" style="display: none;">
@@ -35,17 +35,26 @@
                     <div id="difficultyBTNs"></div>
                 </div>
                 <div id="questions" style="display: none;">
-                    <div id="clearFixAfter">
-                        <div id="category"></div>
-                        <div id="difficulty"></div>
-                    </div>
+                    <div id="category"></div>
+                    <div id="difficulty"></div>
                     <div id="question"></div>
                     <div id="answerBTNs"></div>
+                    <div id="timer"></div>
+                </div>
+                <div id="revealAnswer" style="display: none;">
+                    <div id="result"></div>
+                    <div id="correctAnswer"></div>
+                    <div id="dividerLine">____________________</div>
+                    <div id="correctAnswers"></div>
+                    <div id="incorrectAnswers"></div>
+                    <div id="unanswered"></div>
+                    <div id="playAgainBTN" class="button" style="display: none;">Click To Play Again</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="./assets/javascript/Utility.js"></script>
     <script src="./assets/javascript/ViewController.js"></script>
     <script src="./assets/javascript/Model.js"></script>
     <script src="./assets/javascript/GameController.js"></script>

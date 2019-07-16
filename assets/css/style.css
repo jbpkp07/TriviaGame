@@ -47,7 +47,6 @@ body, html {
 }
 
 #chalkboardBox {
-    /* background: blue; */
     height: 61.5%;
     margin: 0 auto;
     padding: 10px;
@@ -63,7 +62,7 @@ body, html {
     top: 20%;
 }
 
-#startBTN, .categoryBTN, .difficultyBTN {
+.button {
     border: 2px solid rgb(244, 244, 240);
     border-radius: 25px;
     font-size: 2vw;
@@ -81,36 +80,43 @@ body, html {
     text-align: center;
 }
 
+#category {
+    margin-bottom: 2%;
+}
 
-
-#question, #answerBTNs {
+#question {
     font-size: 2vw;
     margin-top: 10%;
 }
 
-#category {
-    float: left;
-}
-
-#difficulty {
-    float: right;
-}
-
-#clearFixAfter::after {
-    clear: both;
-    content: "";
-    display: block;
-}
-
 .answerBTN {
-    border: 2px solid rgb(244, 244, 240);
-    border-radius: 25px;
-    font-size: 1.0vw;
-    margin: 0 auto;
-    margin-top: 5%;
-    padding: 1%;
-    position: relative;
+    font-size: 1.25vw;
+    margin-top: 6%;
+    width: 100%;
+}
+
+#timer {
+    bottom: 2%;
+    font-size: 1.25vw;
+    left: 43%;
+    position: absolute;
+    width: 100%;
+}
+
+#revealAnswer, #playAgainBTN {
+    font-size: 1.5vw;
     text-align: center;
-    top: 30%;
-    width: 55%;
+}
+
+#result {
+    font-size: 4vw;
+    margin-top: 20%;
+}
+
+#dividerLine {
+    font-size: 4vw;
+}
+
+.totals, #playAgainBTN {
+    margin-top: 10%;
 }

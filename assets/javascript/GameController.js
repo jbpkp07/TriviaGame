@@ -1,5 +1,5 @@
 "use strict";
-/* global ViewController, Model */
+/* global ViewController, Model, Game, Utility */
 
 class GameController {
 
@@ -10,11 +10,10 @@ class GameController {
         this._IsCategoryPicked = false;
         this._IsDifficultyPicked = false;
         this._AreTriviaQuestionsConsumed = false;
+        this._PlayAgain = false;
     }
 
     beginStartSequence() {
-
-        this._ViewController.initialize();
 
         $("#startBTN").click(() => {
 
@@ -23,7 +22,7 @@ class GameController {
             this._ViewController.startGame();
         });
 
-        return this.createPromise(() => this._ViewController.isGameStarted === true);
+        return Utility.createPromise(() => this._ViewController.isGameStarted === true );
     }
 
     pickCategory() {
@@ -46,7 +45,7 @@ class GameController {
             });
         });
 
-        return this.createPromise(() => this._IsCategoryPicked === true);
+        return Utility.createPromise(() => this._IsCategoryPicked === true);
     }
 
     pickDifficulty() {
@@ -65,42 +64,20 @@ class GameController {
 
                 thisController._Model._DifficultyPicked = $(this).text();
 
+                let startTime;
+
+                if (thisController._Model._DifficultyPicked === "Hard") { startTime = 10; }
+                else if (thisController._Model._DifficultyPicked === "Medium") { startTime = 20; }
+                else { startTime = 30; }
+
+                thisController._ViewController._StartTime = startTime;
+
                 thisController._IsDifficultyPicked = true;
             });
         });
 
-        return this.createPromise(() => this._IsDifficultyPicked === true);
+        return Utility.createPromise(() => this._IsDifficultyPicked === true);
     }
-
-    // getTriviaQuestionsFromAPI() {
-
-    //     let apiURL = this._Model.getAPIUrl();
-
-    //     let connection = {
-    //         url: apiURL,
-    //         method: "Get"
-    //     };
-
-    //     $.ajax(connection).then((response) => {
-
-    //         if (response.response_code !== 0) {
-
-    //             alert("Triva API did not return results. Please refresh page and try again.");
-    //             throw new Error("Class:GameController:getTriviaQuestionsFromAPI trivia API did not respond correctly");
-    //         }
-
-    //         this._Model.setTriviaQuestions(response);
-
-    //         this._AreTriviaQuestionsConsumed = true;
-
-    //     }).catch(() => {
-
-    //         alert("Triva API did not return results. Please refresh page and try again.");
-    //         throw new Error("Class:GameController:getTriviaQuestionsFromAPI trivia API did not respond correctly");
-    //     });
-
-    //     return this.createPromise(() => this._AreTriviaQuestionsConsumed === true);
-    // }
 
     getTriviaQuestionsFromAPI() {
 
@@ -109,45 +86,90 @@ class GameController {
         return promise;
     }
 
-    beginTriviaQuestions() {
+    answerTriviaQuestions() {
 
         if (this._Model._IsAnotherQuestionAvailable) {
 
-            this.startNextQuestion();
+            this._ViewController.hideRevealAnswer(1000).then(() => {
+
+                this.startNextQuestion();
+            });
         }
+        else {
+
+            this._ViewController.showPlayAgainBTN(1000).then(() => {
+
+                $("#playAgainBTN").click(() => {
+
+                    $("#playAgainBTN").off("click");
+
+                    this._ViewController.hidePlayAgainBTN(1000).then(() => {
+
+                        this._ViewController.hideRevealAnswer(1000).then(() => {
+                            
+                            this._PlayAgain = true;
+                        });
+                    });
+                });
+            });
+        }
+
+        return Utility.createPromise(() => this._PlayAgain === true);
     }
 
     startNextQuestion() {
+
+        let thisController = this;
 
         let question = this._Model.getNextTriviaQuestion();
 
         this._ViewController.createNewQuestion(question);
 
-        this._ViewController.showQuestion().then(() => {
+        this._ViewController.showQuestion(1000).then(() => {
+
+            this._ViewController.startTimer();
+
+            Utility.createPromise(() => this._ViewController._IsTimerRunning === false).then(() => {
+
+                if (!thisController._ViewController._WasTimerManuallyStopped) {
+
+                    $(".answerBTN").off("click");
+
+                    thisController._Model.updateQuestionUnAnswered();
+
+                    this.revealAnswer();
+                }
+            });
 
             $(".answerBTN").click(function () { 
+
+                thisController._ViewController.stopTimer();
 
                 $(".answerBTN").off("click");
 
                 let selectedAnswer = $(this).text();
 
-                alert(selectedAnswer);
+                thisController._Model.updateQuestionAnswered(selectedAnswer);
+
+                thisController.revealAnswer();
             });
         });
     }
 
-    createPromise(waitFunction) {
+    revealAnswer() {
 
-        const poll = (resolve) => {
+        this._ViewController.hideQuestion(1000).then(() => {
 
-            if (waitFunction()) {
-                resolve();
-            }
-            else {
-                setTimeout(() => poll(resolve), 100);
-            }
-        };
+            this._ViewController.setRevealAnswer(this._Model._CurrentQuestion, this._Model._Results);
 
-        return new Promise(poll);
+            this._ViewController.showRevealAnswer(1000).then(() => {
+             
+                setTimeout(() => { 
+
+                    this.answerTriviaQuestions();
+
+                }, 5000);
+            });
+        });
     }
 }
