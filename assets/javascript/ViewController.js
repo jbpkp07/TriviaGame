@@ -6,10 +6,18 @@ class ViewController {
 
         this._GameTitle = $("#gameTitle");
         this._StartBtn = $("#startBTN");
+
         this._PickCategory = $("#categories");
         this._CategoryBTNs = $("#categoryBTNs");
+
         this._PickDifficulty = $("#difficulties");
         this._DifficultyBTNs = $("#difficultyBTNs");
+
+        this._Questions = $("#questions");
+        this._Question = $("#question");
+        this._Category = $("#category");
+        this._Difficulty = $("#difficulty");
+        this._AnswerBTNs = $("#answerBTNs");
 
         this._IsGameStarted = false;
     }
@@ -117,10 +125,42 @@ class ViewController {
         return this._PickDifficulty.fadeOut(mSec).promise();
     }
 
+    createNewQuestion(question) {
 
+        this._Category.html("Category: &nbsp;&nbsp;" + question._Category);
 
+        let difficulty = question._Difficulty.charAt(0).toUpperCase() + question._Difficulty.slice(1);
 
+        this._Difficulty.html("Difficulty: &nbsp;&nbsp;" + difficulty);
 
+        this._Question.html("Question: &nbsp;" + question._Question);
+
+        for (let answer of question._Answers) {
+
+            var newBTN = $("<div>");
+
+            newBTN.text(answer);
+
+            newBTN.addClass("answerBTN");
+
+            this._AnswerBTNs.append(newBTN);
+        }
+    }
+
+    emptyAnswerBTNs() {
+
+        this._AnswerBTNs.empty();
+    }
+
+    showQuestion(mSec) {
+
+        return this._Questions.fadeIn(mSec).promise();
+    }
+
+    hideQuestion(mSec) {
+
+        return this._Questions.fadeOut(mSec).promise();
+    }
 
 
     get isGameStarted() { return this._IsGameStarted; }

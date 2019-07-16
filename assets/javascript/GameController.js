@@ -17,7 +17,7 @@ class GameController {
         this._ViewController.initialize();
 
         $("#startBTN").click(() => {
-            
+
             $("#startBTN").off("click");
 
             this._ViewController.startGame();
@@ -31,15 +31,15 @@ class GameController {
         this._ViewController.createCategoryBTNs(this._Model._TriviaAPI._Categories);
 
         this._ViewController.showPickCategory(1000);
-        
+
         let thisController = this;
 
-        $(".categoryBTN").click(function() { 
+        $(".categoryBTN").click(function () {
 
             $(".categoryBTN").off("click");
 
             thisController._ViewController.hidePickCategory(1000).then(() => {
-                
+
                 thisController._Model._CategoryPicked = $(this).text();
 
                 thisController._IsCategoryPicked = true;
@@ -54,15 +54,15 @@ class GameController {
         this._ViewController.createDifficultyBTNs(this._Model._TriviaAPI._Difficulties);
 
         this._ViewController.showPickDifficulty(1000);
-        
+
         let thisController = this;
 
-        $(".difficultyBTN").click(function() { 
+        $(".difficultyBTN").click(function () {
 
             $(".difficultyBTN").off("click");
 
             thisController._ViewController.hidePickDifficulty(1000).then(() => {
-                
+
                 thisController._Model._DifficultyPicked = $(this).text();
 
                 thisController._IsDifficultyPicked = true;
@@ -72,32 +72,66 @@ class GameController {
         return this.createPromise(() => this._IsDifficultyPicked === true);
     }
 
+    // getTriviaQuestionsFromAPI() {
+
+    //     let apiURL = this._Model.getAPIUrl();
+
+    //     let connection = {
+    //         url: apiURL,
+    //         method: "Get"
+    //     };
+
+    //     $.ajax(connection).then((response) => {
+
+    //         if (response.response_code !== 0) {
+
+    //             alert("Triva API did not return results. Please refresh page and try again.");
+    //             throw new Error("Class:GameController:getTriviaQuestionsFromAPI trivia API did not respond correctly");
+    //         }
+
+    //         this._Model.setTriviaQuestions(response);
+
+    //         this._AreTriviaQuestionsConsumed = true;
+
+    //     }).catch(() => {
+
+    //         alert("Triva API did not return results. Please refresh page and try again.");
+    //         throw new Error("Class:GameController:getTriviaQuestionsFromAPI trivia API did not respond correctly");
+    //     });
+
+    //     return this.createPromise(() => this._AreTriviaQuestionsConsumed === true);
+    // }
+
     getTriviaQuestionsFromAPI() {
 
-        let apiURL = this._Model.getAPIUrl();
-      
-        let connection = {
-            url: apiURL,
-            method: "Get"
-        };   
-        
-        $.ajax(connection).then((response) => {
+        let promise = this._Model.setTriviaQuestions();
 
-            this._Model.setTriviaQuestions(response);
-
-            this._AreTriviaQuestionsConsumed = true;
-        }).catch(() => {
-
-            alert("Triva API did not return results. Please refresh page and try again.");
-            throw new Error("Class:GameController:getTriviaQuestionsFromAPI trivia API did not respond correctly");
-        });
-
-        return this.createPromise(() => this._AreTriviaQuestionsConsumed === true);
+        return promise;
     }
 
     beginTriviaQuestions() {
 
-        alert("here");
+        if (this._Model._IsAnotherQuestionAvailable) {
+
+            let question = this._Model.getNextTriviaQuestion();
+
+            this._ViewController.createNewQuestion(question);
+
+            this._ViewController.showQuestion().then(() => {
+
+                    alert("paused");
+            });
+
+        
+        }
+
+
+
+    }
+
+    startNextQuestion() {
+
+
     }
 
     createPromise(waitFunction) {

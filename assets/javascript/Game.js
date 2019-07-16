@@ -40,7 +40,7 @@ class Game {
 
             this._GameController.beginTriviaQuestions();
 
-            this.startGame();
+            // this.startGame();
         });
     }
 }

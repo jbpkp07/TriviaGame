@@ -4,31 +4,53 @@ class Model {
 
     constructor() {
 
-        this._QuestionAmount = 10;
-        this._TriviaAPI = new TriviaAPI(this._QuestionAmount);
         this._TriviaQuestions = [];
         this._TriviaQuestionsIndex = 0;
+
+        this._QuestionAmount = 10;
+
         this._CategoryPicked = null;
         this._DifficultyPicked = null;
+
+        this._AreQuestionsReady = false;
+        this._IsAnotherQuestionAvailable = false;
+
+        this._TriviaAPI = new TriviaAPI(this._QuestionAmount);
     }
 
-    getAPIUrl() {
+    setTriviaQuestions() {
 
-        if (this._CategoryPicked === null ||  this._DifficultyPicked === null) {
+        this._AreQuestionsReady = false;
+        this._TriviaQuestions = [];
 
-            throw new Error("Class:Model:getAPIUrl _CategoryPicked or _DifficultyPicked is null");
+        if (this._CategoryPicked === null || this._DifficultyPicked === null) {
+
+            alert("ERROR:  Class:Model:setTriviaQuestions _CategoryPicked or _DifficultyPicked is null");
+            throw new Error("Class:Model:setTriviaQuestions _CategoryPicked or _DifficultyPicked is null");
         }
 
-        return this._TriviaAPI.generateAPIString(this._CategoryPicked, this._DifficultyPicked);
-    }
+        this._TriviaAPI.getTriviaQuestionsFromAPI(this._CategoryPicked, this._DifficultyPicked).then(() => {
 
-    setTriviaQuestions(jsonResponse) {
+            for (let question of this._TriviaAPI._APIResponse.results) {
 
-        for (let question of jsonResponse.results) {
+                this._TriviaQuestions.push(new TriviaQuestion(question));
+            }
+    
+            if (this._TriviaQuestions.length !== this._QuestionAmount) {
 
-            this._TriviaQuestions.push(question);
-            console.log(question);
-        }
+                alert("ERROR:  Class:Model:setTriviaQuestions TriviaAPI did not return the expected amount of questions");
+                throw new Error("Class:Model:setTriviaQuestions TriviaAPI did not return the expected amount of questions");
+            }
+
+            if (this._TriviaQuestions.length > 0) {
+
+                this._IsAnotherQuestionAvailable = true;
+            }
+
+            this._AreQuestionsReady = true;
+        });
+
+        return this.createPromise(() => this._AreQuestionsReady === true);
     }
 
     getNextTriviaQuestion() {
@@ -39,33 +61,31 @@ class Model {
 
         if (this._TriviaQuestionsIndex === this._QuestionAmount) {
 
-            throw new Error("Class:Model:getNextTriviaQuestion index out-of-range");
+            this._IsAnotherQuestionAvailable = false;
         }
 
         return question;
     }
 
+    createPromise(waitFunction) {
+
+        const poll = (resolve) => {
+
+            if (waitFunction()) {
+                resolve();
+            }
+            else {
+                setTimeout(() => poll(resolve), 100);
+            }
+        };
+
+        return new Promise(poll);
+    }
+
     // get guessesRemaining() { return this._GuessesRemaining; }
     // set guessesRemaining(value) { throw new Error("Class:Model:guessesRemaining is PRIVATE"); }
-
-    // get wins() { return this._Wins; }
-    // set wins(value) { throw new Error("Class:Model:wins is PRIVATE"); }
-
-    // get score() { return this._Score; }
-    // set score(value) { throw new Error("Class:Model:score is PRIVATE"); }
-
-    // get btnElements() { return this._BtnElements; }
-    // set btnElements(value) { throw new Error("Class:Model:btnElements is PRIVATE"); }
-
-    // get currentPhrase() { return this._CurrentPhrase; }
-    // set currentPhrase(value) { throw new Error("Class:Model:currentPhrase is PRIVATE"); }
-
-    // get getStatus() { return this._Status; }
-    // set getStatus(value) { throw new Error("Class:Model:getStatus is PRIVATE"); }
-
-    // get letterElementsSelected() { return this._LetterElementsSelected; }
-    // set letterElementsSelected(value) { throw new Error("Class:Model:letterElementsSelected is PRIVATE"); }
 }
+
 
 class TriviaAPI {
 
@@ -79,9 +99,45 @@ class TriviaAPI {
 
         this._Categories = ["General Knowledge", "Sports", "Computers", "Video Games", "Movies", "History"];
         this._Difficulties = ["Easy", "Medium", "Hard"];
+
+        this._APIResponse = null;
+
+        this._AreTriviaQuestionsConsumed = false;
     }
 
-    generateAPIString(category, difficulty) {
+    getTriviaQuestionsFromAPI(category, difficulty) {
+
+        let apiURL = this.generateAPIUrl(category, difficulty);
+
+        let connection = {
+            url: apiURL,
+            method: "Get"
+        };
+
+        this._AreTriviaQuestionsConsumed = false;
+
+        $.ajax(connection).then((response) => {
+
+            if (response.response_code !== 0) {
+
+                alert("Triva API did not return results. Please refresh page and try again.");
+                throw new Error("Class:GameController:getTriviaQuestionsFromAPI trivia API did not respond correctly");
+            }
+
+            this._APIResponse = response;
+
+            this._AreTriviaQuestionsConsumed = true;
+            
+        }).catch(() => {
+
+            alert("Triva API did not return results. Please refresh page and try again.");
+            throw new Error("Class:GameController:getTriviaQuestionsFromAPI trivia API did not respond correctly");
+        });
+
+        return this.createPromise(() => this._AreTriviaQuestionsConsumed === true);
+    }
+
+    generateAPIUrl(category, difficulty) {
 
         let categoryNum;
 
@@ -107,13 +163,78 @@ class TriviaAPI {
                 break;
         }
 
-        let apiString =
+        let apiUrl =
             this._APIRoot + "?" +
             this._APIAmount + "&" +
             this._APICategory + categoryNum + "&" +
             this._APIDifficulty + difficulty.toLowerCase() + "&" +
             this._APIType;
 
-        return apiString;
+        return apiUrl;
+    }
+
+    createPromise(waitFunction) {
+
+        const poll = (resolve) => {
+
+            if (waitFunction()) {
+                resolve();
+            }
+            else {
+                setTimeout(() => poll(resolve), 100);
+            }
+        };
+
+        return new Promise(poll);
+    }
+}
+
+
+class TriviaQuestion {
+
+    constructor(jsonQuestion) {
+
+        this._Category = jsonQuestion.category;
+        this._Type = jsonQuestion.type;
+        this._Difficulty = jsonQuestion.difficulty;
+        this._Question = jsonQuestion.question;
+        this._CorrectAnswer = jsonQuestion.correct_answer;
+        this._IncorrectAnswers = jsonQuestion.incorrect_answers;
+
+        this._Answers = [];
+
+        this.randomizeAnswers();
+    }
+
+    randomizeAnswers() {
+
+        for (let incorrectAnswer of this._IncorrectAnswers) {
+
+            this._Answers.push(incorrectAnswer);
+        }
+
+        this._Answers.push(this._CorrectAnswer);
+
+        this._Answers = this.shuffle(this._Answers);
+    }
+
+    shuffle(array) {
+
+        let currentIndex = array.length;
+        let temporaryValue;
+        let randomIndex;
+      
+        while (currentIndex !== 0) {
+
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          
+          currentIndex--;
+      
+          temporaryValue = array[currentIndex];
+          array[currentIndex] = array[randomIndex];
+          array[randomIndex] = temporaryValue;
+        }
+      
+        return array;
     }
 }
