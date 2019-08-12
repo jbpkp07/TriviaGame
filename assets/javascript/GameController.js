@@ -168,7 +168,7 @@ class GameController {
 
                     this.answerTriviaQuestions();
 
-                }, 5000);
+                }, 3000);
             });
         });
     }
